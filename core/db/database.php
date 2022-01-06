@@ -15,7 +15,7 @@ class database {
     public const ALL = ["*"];
     public const LIMIT1 = ["from" => 0, "total" => 1];
 
-    public function __construct(\core\db\options $options) {
+    public function __construct(object $options) {
         try {
             $this->pdo = new \PDO($options->dsn, $options->user ?? null, $options->password ?? null);
         } catch (\Exception $ex) {

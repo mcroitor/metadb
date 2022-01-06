@@ -2,7 +2,7 @@
 
 namespace core;
 
-class meta_structure implements \core\meta {
+class meta_structure implements \core\api\meta {
 
 
     public function create(string $table_name, array $table_columns): string {

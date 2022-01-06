@@ -1,8 +1,6 @@
 <?php
 
-include_once './core/database.php';
-include_once './core/meta.php';
-include_once './core/generator.php';
+include_once __DIR__ . '/config.php';
 
 $short_options = null; //"d:u::p::";
 
@@ -13,6 +11,10 @@ $long_options = [
 ];
 
 $options = getopt($short_options, $long_options);
+
+if(count($options) === 0) {
+    exit("usage: php " . str_replace(__DIR__, "", __FILE__) . "--dsn=<DSN> [--user=<USER> --password=<PASSWORD>]");
+}
 
 if(empty($options["dsn"])){
     exit("dsn string is not specified, exit.");
@@ -27,11 +29,13 @@ $config = (object) [
 $generator = new \core\generator($config);
 
 // create folder for output
-if (!file_exists($generator::$outputdir)) {
-    if (!mkdir($generator::$outputdir)) {
-        exit("cant create directory {$generator::$outputdir}" . PHP_EOL);
+$generator->set_output_dir(config::root_dir . "meta" . DIRECTORY_SEPARATOR);
+
+if (!file_exists($generator->get_output_dir())) {
+    if (!mkdir($generator->get_output_dir())) {
+        exit("cant create directory {$generator->get_output_dir()}" . PHP_EOL);
     }
 }
-echo "created successfully {$generator::$outputdir} directory" . PHP_EOL;
+echo "created successfully {$generator->get_output_dir()} directory" . PHP_EOL;
 
-$generator->do();
+$generator->do(new core\meta_structure());

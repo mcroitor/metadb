@@ -2,19 +2,26 @@
 
 namespace core;
 
-use core\database;
-use core\meta;
+use core\db\database;
+use core\api\meta;
 
-class generator implements analyzer {
+class generator {
 
     private const SQLITE = "sqlite";
     private const MYSQL = "mysql";
 
     private $db;
-    public static $outputdir = __DIR__ . DIRECTORY_SEPARATOR . "meta" . DIRECTORY_SEPARATOR;
+    private $outputdir =  "." . DIRECTORY_SEPARATOR;
 
     public function __construct(object $options) {
         $this->db = new database($options);
+    }
+    
+    public function set_output_dir(string $output_dir) {
+        $this->outputdir = $output_dir;
+    }
+    public function get_output_dir(): string {
+        return $this->outputdir;
     }
 
     public function do(meta $meta) {
@@ -41,16 +48,16 @@ class generator implements analyzer {
     public function get_fields(string $table): array {
         $column_names = [];
 
-        $select = $this->db->query_sql("DESCRIBE TABLE {$table}");
-        $row = $select[0];
-        foreach ($row as $column_name => $value) {
-            $column_names[] = $column_name;
+        //$select = $this->db->query_sql("DESCRIBE TABLE {$table}");
+        $select = $this->db->query_sql("PRAGMA table_info({$table})");
+        foreach ($select as $field_description) {
+            $column_names[] = $field_description["name"];
         }
         return $column_names;
     }
 
     private function sqlite_get_tables(): array {
-        return $this->db->select_column("sqlite_sequence", "name");
+        return $this->db->select_column("sqlite_master", "name");
     }
 
     private function mysql_get_tables(): array {
