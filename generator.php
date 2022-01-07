@@ -38,5 +38,5 @@ if (!file_exists($generator->get_output_dir())) {
 }
 echo "created successfully {$generator->get_output_dir()} directory" . PHP_EOL;
 
-$generator->do(new core\meta_structure());
+$generator->do(new core\meta_class());
 echo "done." . PHP_EOL;

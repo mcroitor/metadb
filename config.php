@@ -12,6 +12,7 @@ class config {
     private const lib = [
         "db\\database",
         "meta_structure",
+        "meta_class",
         "generator",
     ];
 

@@ -18,7 +18,7 @@ class meta_structure implements \core\api\meta {
                 $data .= "\tpublic const {$column} = '{$column}';" . PHP_EOL;
             }
         }
-        $data .= "};" . PHP_EOL;
+        $data .= "}" . PHP_EOL;
 
         return $data;
     }
