@@ -1,8 +1,8 @@
 <?php
 
-include_once __DIR__ . '/config.php';
+include_once __DIR__ . "/config.php";
 
-$short_options = null; //"d:u::p::";
+$short_options = ""; //"d:u::p::";
 
 $long_options = [
     "dsn:",
@@ -39,3 +39,4 @@ if (!file_exists($generator->get_output_dir())) {
 echo "created successfully {$generator->get_output_dir()} directory" . PHP_EOL;
 
 $generator->do(new core\meta_structure());
+echo "done." . PHP_EOL;

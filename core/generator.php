@@ -29,7 +29,7 @@ class generator {
 
         // foreach table create description
         foreach ($tables as $table) {
-            file_put_contents(self::$outputdir . "{$table}.php", $meta->create($table, $this->get_fields($table)));
+            file_put_contents($this->outputdir . "{$table}.php", $meta->create($table, $this->get_fields($table)));
         }
     }
 
