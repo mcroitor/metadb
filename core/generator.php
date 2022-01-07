@@ -31,6 +31,12 @@ class generator {
         foreach ($tables as $table) {
             file_put_contents($this->outputdir . "{$table}.php", $meta->create($table, $this->get_fields($table)));
         }
+        // create include script
+        $result = "<?php" . PHP_EOL . PHP_EOL;
+        foreach ($tables as $table){
+            $result .= "include_once __DIR__ . '/{$table}.php';" . PHP_EOL;
+        }
+        file_put_contents("{$this->outputdir}include_meta.php", $result);
     }
 
     private function get_tables(): array {
