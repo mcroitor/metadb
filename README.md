@@ -23,7 +23,7 @@ For table:
 ```SQL
 CREATE TABLE sample (id INTEGER, param TEXT);
 ```
-will be crated file _sample.php_:
+will be created file _sample.php_:
 ```php
 <?php
 namespace meta;
