@@ -27,17 +27,4 @@ $config = (object) [
         "password" => $options["password"] ?? null,
 ];
 
-$generator = new \core\generator($config);
-
-// create folder for output
-$generator->set_output_dir($options["output"] ?? config::root_dir . "meta" . DIRECTORY_SEPARATOR);
-
-if (!file_exists($generator->get_output_dir())) {
-    if (!mkdir($generator->get_output_dir())) {
-        exit("cant create directory {$generator->get_output_dir()}" . PHP_EOL);
-    }
-}
-echo "created successfully {$generator->get_output_dir()} directory" . PHP_EOL;
-
-$generator->do(new core\meta_class());
-echo "done." . PHP_EOL;
+echo create_meta_info($config, $options["output"] ?? __DIR__ . "/output/");
