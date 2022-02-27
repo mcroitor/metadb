@@ -5,7 +5,8 @@ namespace core;
 use core\db\database;
 use core\api\meta;
 
-class generator {
+class generator
+{
 
     private const SQLITE = "sqlite";
     private const MYSQL = "mysql";
@@ -25,7 +26,8 @@ class generator {
     private $db;
     private $outputdir = "." . DIRECTORY_SEPARATOR;
 
-    public function __construct(object $options) {
+    public function __construct(object $options)
+    {
         $this->db = new database($options);
         $db_type = $this->db->get_type();
         if (array_key_exists($db_type, self::GET_TABLES) === false) {
@@ -33,15 +35,18 @@ class generator {
         }
     }
 
-    public function set_output_dir(string $output_dir) {
+    public function set_output_dir(string $output_dir)
+    {
         $this->outputdir = $output_dir;
     }
 
-    public function get_output_dir(): string {
+    public function get_output_dir(): string
+    {
         return $this->outputdir;
     }
 
-    public function do(meta $meta) {
+    public function do(meta $meta)
+    {
         $tables = $this->get_tables();
 
         // foreach table create description
@@ -57,12 +62,14 @@ class generator {
         file_put_contents("{$this->outputdir}_include_meta.php", $result);
     }
 
-    private function get_tables(): array {
+    private function get_tables(): array
+    {
         $db_type = $this->db->get_type();
         return $this->{self::GET_TABLES[$db_type]}();
     }
 
-    public function get_fields(string $table): array {
+    public function get_fields(string $table): array
+    {
         $column_names = [];
         $db_type = $this->db->get_type();
         $query = str_replace("{table}", $table, self::GET_FIELDS[$db_type]);
@@ -73,11 +80,13 @@ class generator {
         return $column_names;
     }
 
-    private function sqlite_get_tables(): array {
-        return $this->db->select_column("sqlite_master", "name");
+    private function sqlite_get_tables(): array
+    {
+        return $this->db->select_column("sqlite_master", "name", ["type" => "table"]);
     }
 
-    private function mysql_get_tables(): array {
+    private function mysql_get_tables(): array
+    {
         $tmp = $this->db->query_sql("SHOW TABLES");
         $result = [];
         foreach ($tmp as $value) {
@@ -85,5 +94,4 @@ class generator {
         }
         return $result;
     }
-
 }

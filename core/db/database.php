@@ -108,8 +108,8 @@ class database {
         return $this->query_sql($query);
     }
     
-    public function select_column(string $table, string $column_name, array $limit = []): array {
-        $tmp = $this->select($table, [$column_name], [], $limit);
+    public function select_column(string $table, string $column_name, array $where = [], array $limit = []): array {
+        $tmp = $this->select($table, [$column_name], $where, $limit);
         $result = [];
         foreach ($tmp as $value) {
             $result[] = $value[$column_name];
