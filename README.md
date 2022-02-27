@@ -8,7 +8,7 @@ equal to column names and fields with the same name.
 
 ## Usage:
 ```shell
-$ php generator.php --dsn=<DSN> [--user=<USER> --password=<PASSWORD>]
+$ php generator.php --dsn=<DSN> [--user=<USER> --password=<PASSWORD>] [--output=<OUTPUT_FOLDER>]
 ```
 
 Supported databases: MySQL, sqlite.

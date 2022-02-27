@@ -7,7 +7,8 @@ $short_options = ""; //"d:u::p::";
 $long_options = [
     "dsn:",
     "user::",
-    "password::"
+    "password::",
+    "output::",
 ];
 
 $options = getopt($short_options, $long_options);
@@ -29,7 +30,7 @@ $config = (object) [
 $generator = new \core\generator($config);
 
 // create folder for output
-$generator->set_output_dir(config::root_dir . "meta" . DIRECTORY_SEPARATOR);
+$generator->set_output_dir($options["output"] ?? config::root_dir . "meta" . DIRECTORY_SEPARATOR);
 
 if (!file_exists($generator->get_output_dir())) {
     if (!mkdir($generator->get_output_dir())) {
