@@ -1,7 +1,8 @@
 <?php
 include_once __DIR__ . "/config.php";
 
-function create_meta_info($dboptions, $output_dir) {
+function create_meta_info($dboptions, $output_dir)
+{
     $generator = new \core\generator($dboptions);
     $generator->set_output_dir($output_dir);
 

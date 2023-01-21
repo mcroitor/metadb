@@ -13,18 +13,18 @@ $long_options = [
 
 $options = getopt($short_options, $long_options);
 
-if(count($options) === 0) {
+if (empty($options)) {
     exit("usage: php " . str_replace(__DIR__, "", __FILE__) . "--dsn=<DSN> [--user=<USER> --password=<PASSWORD>]");
 }
 
-if(empty($options["dsn"])){
+if (empty($options["dsn"])) {
     exit("dsn string is not specified, exit.");
 }
 
 $config = (object) [
-        "dsn" => $options["dsn"],
-        "user" => $options["user"] ?? null,
-        "password" => $options["password"] ?? null,
+    "dsn" => $options["dsn"],
+    "user" => $options["user"] ?? null,
+    "password" => $options["password"] ?? null,
 ];
 
 echo create_meta_info($config, $options["output"] ?? __DIR__ . "/output/");

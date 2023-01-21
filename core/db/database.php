@@ -7,15 +7,17 @@ namespace core\db;
  *
  * @author Croitor Mihail <mcroitor@gmail.com>
  */
-class database {
+class database
+{
 
     //put your code here
     private $pdo;
-    
+
     public const ALL = ["*"];
     public const LIMIT1 = ["from" => 0, "total" => 1];
 
-    public function __construct(object $options) {
+    public function __construct(object $options)
+    {
         try {
             $this->pdo = new \PDO($options->dsn, $options->user ?? null, $options->password ?? null);
         } catch (\Exception $ex) {
@@ -23,8 +25,9 @@ class database {
             die('DB init Error: ' . $ex->getMessage() . "DSN = {$obj}");
         }
     }
-    
-    public function get_type(): string {
+
+    public function get_type(): string
+    {
         return $this->pdo->getAttribute(\PDO::ATTR_DRIVER_NAME);
     }
 
@@ -36,17 +39,17 @@ class database {
      * @param bool $need_fetch
      * @return array
      */
-    public function query_sql(string $query, string $error = "Error: ", bool $need_fetch = true): array {
+    public function query_sql(string $query, string $error = "Error: ", bool $need_fetch = true): array
+    {
         $array = array();
-        // echo "[debug] {$query}" . PHP_EOL;
         $result = $this->pdo->query($query);
         if ($result === false) {
             $aux = "{$error} {$query}: "
-                    . $this->pdo->errorInfo()[0]
-                    . " : "
-                    . $this->pdo->errorInfo()[1]
-                    . ", message = "
-                    . $this->pdo->errorInfo()[2];
+                . $this->pdo->errorInfo()[0]
+                . " : "
+                . $this->pdo->errorInfo()[1]
+                . ", message = "
+                . $this->pdo->errorInfo()[2];
             exit($aux);
         }
         if ($need_fetch) {
@@ -59,7 +62,8 @@ class database {
      * Method for dump parsing and execution
      * @param string $dump
      */
-    public function parse_sqldump(string $dump) {
+    public function parse_sqldump(string $dump)
+    {
         if (\file_exists($dump)) {
             $sql = \str_replace(["\n\r", "\r\n", "\n\n"], "\n", file_get_contents($dump));
             $queries = \explode(";", $sql);
@@ -77,7 +81,8 @@ class database {
      * @param string $string
      * @return string
      */
-    private function strip_sqlcomment(string $string = ''): string {
+    private function strip_sqlcomment(string $string = ''): string
+    {
         $RXSQLComments = '@(--[^\r\n]*)|(/\*[\w\W]*?(?=\*/)\*/)@ms';
         return (empty($string) ? '' : \preg_replace($RXSQLComments, '', $string));
     }
@@ -90,7 +95,8 @@ class database {
      * @param array $limit definition sample: ['from' => '0', 'total' => '100'].
      * @return array
      */
-    public function select(string $table, array $data = ['*'], array $where = [], array $limit = []): array {
+    public function select(string $table, array $data = ['*'], array $where = [], array $limit = []): array
+    {
         $fields = \implode(", ", $data);
 
         $query = "SELECT {$fields} FROM {$table}";
@@ -107,8 +113,9 @@ class database {
 
         return $this->query_sql($query);
     }
-    
-    public function select_column(string $table, string $column_name, array $where = [], array $limit = []): array {
+
+    public function select_column(string $table, string $column_name, array $where = [], array $limit = []): array
+    {
         $tmp = $this->select($table, [$column_name], $where, $limit);
         $result = [];
         foreach ($tmp as $value) {
@@ -123,7 +130,8 @@ class database {
      * @param array $conditions
      * @return array
      */
-    public function delete(string $table, array $conditions): array {
+    public function delete(string $table, array $conditions): array
+    {
         $tmp = [];
         foreach ($conditions as $key => $value) {
             $tmp[] = "{$key}={$value}";
@@ -133,14 +141,15 @@ class database {
     }
 
     /**
-     * Update fields <b>$values</b> in table <b>$table</b>. <b>$values</b> and 
-     * <b>$conditions</b> are required. 
+     * Update fields <b>$values</b> in table <b>$table</b>. <b>$values</b> and
+     * <b>$conditions</b> are required.
      * @param string $table
      * @param array $values
      * @param array $conditions
      * @return array
      */
-    public function update(string $table, array $values, array $conditions): array {
+    public function update(string $table, array $values, array $conditions): array
+    {
         $tmp1 = [];
         foreach ($conditions as $key => $value) {
             $tmp1[] = "{$key}='{$value}'";
@@ -154,7 +163,8 @@ class database {
         return $this->query_sql($query, "Error: ", false);
     }
 
-    public function insert(string $table, array $values): void {
+    public function insert(string $table, array $values): void
+    {
         $columns = \implode(", ", array_keys($values));
         $data = '"' . \implode('",  "', array_values($values)) . '"';
         $query = "INSERT INTO {$table} ($columns) VALUES ({$data})";
@@ -167,12 +177,14 @@ class database {
      * @param array $where
      * @return bool
      */
-    public function exists(string $table, array $where): bool {
+    public function exists(string $table, array $where): bool
+    {
         $result = $this->select($table, ["count(*) as count"], $where);
         return $result[0]["count"] > 0;
     }
 
-    public function get_tables(): array {
+    public function get_tables(): array
+    {
         $result = [];
         return $result;
     }

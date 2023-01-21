@@ -2,10 +2,12 @@
 
 namespace core;
 
-class meta_structure implements \core\api\meta {
+class meta_structure implements \core\api\meta
+{
 
 
-    public function create(string $table_name, array $table_columns): string {
+    public function create(string $table_name, array $table_columns): string
+    {
         $data = "<?php" . PHP_EOL . PHP_EOL;
         $data .= "namespace meta;" . PHP_EOL . PHP_EOL;
 
@@ -22,5 +24,4 @@ class meta_structure implements \core\api\meta {
 
         return $data;
     }
-
 }
