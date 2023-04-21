@@ -2,7 +2,17 @@
 
 include_once __DIR__ . "/config.php";
 
-$short_options = ""; //"d:u::p::";
+$short_options = ""; /// "d:u::p::";
+
+function usage()
+{
+    echo "usage: php " . str_replace(__DIR__, "", __FILE__)
+        . " --dsn=<DSN> [--user=<USER> --password=<PASSWORD>] [--output=<OUTPUT_DIR>]";
+    echo "\t\t dsn - connection string";
+    echo "\t\t user - db user, used for MySQL, for example";
+    echo "\t\t password - password for db user";
+    echo "\t\t output - path to outpot, implicitly `./output/`";
+}
 
 $long_options = [
     "dsn:",
@@ -14,7 +24,8 @@ $long_options = [
 $options = getopt($short_options, $long_options);
 
 if (empty($options)) {
-    exit("usage: php " . str_replace(__DIR__, "", __FILE__) . "--dsn=<DSN> [--user=<USER> --password=<PASSWORD>]");
+    usage();
+    exit();
 }
 
 if (empty($options["dsn"])) {
