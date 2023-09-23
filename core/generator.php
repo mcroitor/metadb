@@ -2,7 +2,7 @@
 
 namespace core;
 
-use core\db\database;
+use mc\sql\database;
 use core\api\meta;
 
 class generator
@@ -28,7 +28,7 @@ class generator
 
     public function __construct(object $options)
     {
-        $this->db = new database($options);
+        $this->db = new database($options->dsn, $options->user ?? null, $options->password ?? null);
         $db_type = $this->db->get_type();
         if (array_key_exists($db_type, self::GET_TABLES) === false) {
             exit("database '{$db_type}' is not supported");

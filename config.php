@@ -13,7 +13,7 @@ class config
     ];
     /* library files */
     private const lib = [
-        "db\\database",
+        "mc\\database",
         "meta_structure",
         "meta_class",
         "generator",

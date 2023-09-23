@@ -29,12 +29,18 @@ will be created file _sample.php_:
 namespace meta;
 
 class sample {
+/** table name constant */
+	public const __name__ = 'contest_problem';
+
+/** table columns names */
   public const ID = "id";
   public const PARAM = "param";
 
+/** table columns fields */
   public $id;
   public $param;
 
+/** constructor */
   public function __construct(array|object $data) {
     foreach($data as $key => $value) {
       $this->$key = $value;

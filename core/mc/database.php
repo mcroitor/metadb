@@ -1,6 +1,8 @@
 <?php
 
-namespace core\db;
+namespace mc\sql;
+
+use mc\sql\query;
 
 /**
  * PDO wrapper
@@ -10,19 +12,33 @@ namespace core\db;
 class database
 {
 
-    //put your code here
-    private $pdo;
+    public const LIMIT1 = [
+        'limit' => 1,
+        'offset' => 0
+    ];
+    public const LIMIT10 = [
+        'limit' => 10,
+        'offset' => 0
+    ];
+    public const LIMIT20 = [
+        'limit' => 20,
+        'offset' => 0
+    ];
+    public const LIMIT100 = [
+        'limit' => 100,
+        'offset' => 0
+    ];
 
     public const ALL = ["*"];
-    public const LIMIT1 = ["from" => 0, "total" => 1];
 
-    public function __construct(object $options)
+    private $pdo;
+
+    public function __construct(string $dsn, ?string $login = null, ?string $password = null)
     {
         try {
-            $this->pdo = new \PDO($options->dsn, $options->user ?? null, $options->password ?? null);
+            $this->pdo = new \PDO($dsn, $login, $password);
         } catch (\Exception $ex) {
-            $obj = json_encode($options);
-            die('DB init Error: ' . $ex->getMessage() . "DSN = {$obj}");
+            die("DB init Error: " . $ex->getMessage() . "DSN = {$dsn}");
         }
     }
 
@@ -32,8 +48,15 @@ class database
     }
 
     /**
+     * Close connection. After this queries are invalid and object recreating is obligatory.
+     */
+    public function close()
+    {
+        $this->pdo = null;
+    }
+
+    /**
      * Common query method
-     * @global string $site
      * @param string $query
      * @param string $error
      * @param bool $need_fetch
@@ -42,18 +65,22 @@ class database
     public function query_sql(string $query, string $error = "Error: ", bool $need_fetch = true): array
     {
         $array = array();
-        $result = $this->pdo->query($query);
-        if ($result === false) {
-            $aux = "{$error} {$query}: "
-                . $this->pdo->errorInfo()[0]
-                . " : "
-                . $this->pdo->errorInfo()[1]
-                . ", message = "
-                . $this->pdo->errorInfo()[2];
-            exit($aux);
-        }
-        if ($need_fetch) {
-            $array = $result->fetchAll(\PDO::FETCH_ASSOC);
+        try {
+            $result = $this->pdo->query($query);
+            if ($result === false) {
+                $aux = "{$error} {$query}: "
+                    . $this->pdo->errorInfo()[0]
+                    . " : "
+                    . $this->pdo->errorInfo()[1]
+                    . ", message = "
+                    . $this->pdo->errorInfo()[2];
+                exit($aux);
+            }
+            if ($need_fetch) {
+                $array = $result->fetchAll(\PDO::FETCH_ASSOC);
+            }
+        } catch (\PDOException $ex) {
+            exit($ex->getMessage() . ", query: " . $query);
         }
         return $array;
     }
@@ -92,7 +119,7 @@ class database
      * @param string $table
      * @param array $data enumerate columns for selection. Sample: ['id', 'name'].
      * @param array $where associative conditions.
-     * @param array $limit definition sample: ['from' => '0', 'total' => '100'].
+     * @param array $limit definition sample: ['offset' => '1', 'limit' => '100'].
      * @return array
      */
     public function select(string $table, array $data = ['*'], array $where = [], array $limit = []): array
@@ -103,17 +130,25 @@ class database
         if (!empty($where)) {
             $tmp = [];
             foreach ($where as $key => $value) {
-                $tmp[] = "{$key}='{$value}'";
+                $value = $this->pdo->quote($value);
+                $tmp[] = "{$key}=$value";
             }
             $query .= " WHERE " . \implode(" AND ", $tmp);
         }
         if (!empty($limit)) {
-            $query .= " LIMIT {$limit['from']}, {$limit['total']}";
+            $query .= " LIMIT {$limit['offset']}, {$limit['limit']}";
         }
 
         return $this->query_sql($query);
     }
 
+    /**
+     * select column from table
+     * @param string $table
+     * @param string $column_name column name for selection.
+     * @param array $where associative conditions.
+     * @param string $limit definition sample: ['offset' => '1', 'limit' => '100'].
+     */
     public function select_column(string $table, string $column_name, array $where = [], array $limit = []): array
     {
         $tmp = $this->select($table, [$column_name], $where, $limit);
@@ -152,23 +187,37 @@ class database
     {
         $tmp1 = [];
         foreach ($conditions as $key => $value) {
-            $tmp1[] = "{$key}='{$value}'";
+            $value = $this->pdo->quote($value);
+            $tmp1[] = "{$key}={$value}";
         }
         $tmp2 = [];
         foreach ($values as $key => $value) {
-            $tmp2[] = "{$key}='{$value}'";
+            $value = $this->pdo->quote($value);
+            $tmp2[] = "{$key}={$value}";
         }
 
         $query = "UPDATE {$table} SET " . \implode(", ", $tmp2) . " WHERE " . implode(" AND ", $tmp1);
         return $this->query_sql($query, "Error: ", false);
     }
 
-    public function insert(string $table, array $values): void
+    /**
+     * insert values in table, returns id of inserted data.
+     * @param string $table
+     * @param array $values
+     * @return string|false
+     */
+    public function insert(string $table, array $values): string|false
     {
-        $columns = \implode(", ", array_keys($values));
-        $data = '"' . \implode('",  "', array_values($values)) . '"';
+        $columns = \implode(", ", \array_keys($values));
+        // quoting values
+        $quoted_values = \array_values($values);
+        foreach ($quoted_values as $key => $value) {
+            $quoted_values[$key] = $this->pdo->quote($value);
+        }
+        $data = \implode(",  ", $quoted_values);
         $query = "INSERT INTO {$table} ($columns) VALUES ({$data})";
         $this->query_sql($query, "Error: ", false);
+        return $this->pdo->lastInsertId();
     }
 
     /**
@@ -180,12 +229,37 @@ class database
     public function exists(string $table, array $where): bool
     {
         $result = $this->select($table, ["count(*) as count"], $where);
-        return $result[0]["count"] > 0;
+        return !empty($result) && $result[0]["count"] > 0;
     }
 
-    public function get_tables(): array
+    /**
+     * Select unique values from column.
+     * @param string $table
+     * @param string $column
+     */
+    public function unique_values(string $table, string $column): array
     {
-        $result = [];
-        return $result;
+        return $this->query_sql("SELECT {$column} FROM {$table} GROUP BY {$column}");
+    }
+
+    /**
+     * count unique values from column. Result is an array of elements {<column_value>, <count>}
+     * @param string $table
+     * @param string $column
+     * @return array
+     */
+    public function count_unique_values(string $table, string $column): array
+    {
+        return $this->query_sql("SELECT {$column}, count({$column}) AS count FROM {$table} GROUP BY {$column}");
+    }
+
+    /**
+     * Execute a query object.
+     * @param query $query
+     * @return array
+     */
+    public function exec(query $query): array
+    {
+        return $this->query_sql($query->build(), "Error: ", $query->get_type() === query::SELECT);
     }
 }
