@@ -1,5 +1,4 @@
 <?php
-include_once __DIR__ . "/config.php";
 
 function create_meta_info($dboptions, $output_dir)
 {
